@@ -1,22 +1,28 @@
 const https = require('https');
 
-var options = {
-  hostname: 'https://www.googleapis.com/books/v1/volumes?q=Harry+Potter',
-  method: 'GET'
-};
-
 var SearchController = {
 	search: function (req,res) {
+		console.log('param: ' + req.query.q);
+		https.get('https://www.googleapis.com/books/v1/volumes?q=' + req.query.q, (response) => {
 
-		https.get('https://www.googleapis.com/books/v1/volumes?q=Harry+Potter', (response) => {
 			console.log('statusCode: ', response.statusCode);
-			console.log('headers: ', response.headers);
 
+			var body = '';
 
-			response.on('data', (d) => {
-				res.send(process.stdout.write(d));
+			response.on('data', function(chunk) {
+				body += chunk;
 			});
+
+			response.on('end', function(){
+				var fbResponse = JSON.parse(body);
+				console.log("Got a response: ", fbResponse);
+				res.json(fbResponse);
+			});
+
+		}).on('error', function(e){
+      		console.log("Got an error: ", e)
 		});
+
 
 	}
 }
